@@ -10,7 +10,7 @@ const eventSchema = new Schema({
     type:{
         type: String,
         required: true,
-        enum: ['login', 'logout', 'reminder', 'otp', 'signup', 'update_profile', 'delete_account'],
+        enum: ['login', 'reminder', 'otp', 'signup', 'delete_account'],
     },
     method: {
         type: String,

@@ -1,6 +1,20 @@
-import { Schema, model} from 'mongoose';
+import { Schema, model, Document, Types} from 'mongoose';
 
-const preferenceSchema = new Schema({
+export interface IPreference extends Document {
+    user_id: Types.ObjectId;
+    notifications: {
+        email_enabled: boolean;
+        sms_enabled: boolean;
+        push_enabled: boolean;
+    };
+    privacy: {
+        profileVisibility: 'public' | 'private' | 'friends';
+        dataSharing: boolean;
+    };
+    timezone: string;
+}
+
+const preferenceSchema = new Schema<IPreference>({
     user_id: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -37,6 +51,6 @@ const preferenceSchema = new Schema({
     },
 }, { timestamps: true });
 
-const Preference = model("UserPreference", preferenceSchema);
+const Preference = model<IPreference>("UserPreference", preferenceSchema);
 
 export default Preference;

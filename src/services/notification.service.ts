@@ -1,3 +1,7 @@
+
+import nodemailer from 'nodemailer';
+const { google } = require("googleapis");
+
 export interface UserPreference {
     user_id: string; // or mongoose.Types.ObjectId if you import it
     notifications: {
@@ -17,7 +21,7 @@ export interface UserPreference {
 export interface NotificationEvent {
     user_id: string; // or mongoose.Types.ObjectId
     type: 'login' | 'logout' | 'reminder' | 'otp' | 'signup' | 'update_profile' | 'delete_account';
-    method: 'web' | 'mobile' | 'email' | 'sms' | 'push';
+    method: 'email' | 'sms' | 'push';
     status: 'success' | 'queued' | 'failure' | 'pending';
     metadata: Record<string, any>;
     sent_at?: Date;
@@ -25,8 +29,6 @@ export interface NotificationEvent {
     updatedAt?: Date;
 }
 
-import nodemailer from 'nodemailer';
-const { google } = require("googleapis");
 
 const OAuth2 = google.auth.OAuth2;
 //const asyncHandler = require("express-async-handler");
@@ -49,30 +51,6 @@ async function getAccessToken() {
 }
 
 
-
-
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.sendgrid.net',
-  port: 587,
-  auth: {
-    user: 'apikey',
-    pass: process.env.SENDGRID_KEY!
-  }
-});
-
-// export async function sendEmail(event, prefs) {
-//   const content = renderTemplate(event.metadata.template, prefs.language);
-
-//   const msg = {
-//     to: event.metadata.email,      // destination email
-//     from: 'noreply@snads.app',
-//     subject: content.subject,
-//     html: content.body
-//   };
-
-//   return await transporter.sendMail(msg);
-// }
 
 export const sendEmail = async (event: NotificationEvent, prefs: UserPreference) => {
   const transport = nodemailer.createTransport({

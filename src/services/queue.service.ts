@@ -13,7 +13,7 @@ export async function produceEvent(event: any) {
     await producer.send({
         topic: 'notifications',
         messages: [
-            { value: JSON.stringify(event) }
+            { value: JSON.stringify({...event, _id: event._id?.toString()}) }
         ]
     });
 }

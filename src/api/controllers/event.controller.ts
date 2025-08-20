@@ -1,4 +1,4 @@
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import { produceEvent } from "../../services/queue.service";
 import Event from "../../models/event.model";
 import asyncHandler from "express-async-handler";

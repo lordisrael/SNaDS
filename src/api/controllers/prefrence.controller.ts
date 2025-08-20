@@ -3,10 +3,17 @@ import asyncHandler from "express-async-handler";
 
 import Preference from "../../models/prefrence.model";
 import { setUserPref } from "../../services/cache.service";
+import User from "../../models/user.model";
 
-export const setPreference = asyncHandler(async (req: Request, res: Response) => {
+export const updatePreference = asyncHandler(async (req: Request, res: Response) => {
     try {
-        const { user_id, notifications, privacy, timezone } = req.body;
+        const { notifications, privacy, timezone } = req.body;
+        const { user_id } = req.params;
+        const userExists = await User.findById(user_id);
+        if (!userExists) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
         const preference = await Preference.findOneAndUpdate(
             { user_id },
             { notifications, privacy, timezone },

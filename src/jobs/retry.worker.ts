@@ -7,7 +7,7 @@ onEvent(async (event) => {
 
   const wait = Math.pow(2, event.retry) * 1000; // 2s, 4s, 8s ...
   setTimeout(async () => {
-    await produceEvent({...event, from: undefined});
+    await produceEvent({...event});
   }, wait);
 });
   

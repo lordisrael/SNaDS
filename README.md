@@ -48,8 +48,6 @@ Lightweight backend for managing users, preferences, events and logs. Built with
 
 ## Scripts
 - `npm run dev` — dev watchers (API + consumer concurrently)
-- `npm run dev:api` — dev only API (API + consumer concurrently)
-- `npm run dev:consumer` — dev only consumer
 - `npm run build` — TypeScript compile
 - `npm start` — run built app (production)
 

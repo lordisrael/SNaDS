@@ -4,9 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node dist/app.js",
-    "dev:api": "cross-env NODE_ENV=development nodemon --legacy-watch src/app.ts",
-    "dev:consumer": "cross-env NODE_ENV=development nodemon --legacy-watch src/consumers/notification.consumer.ts",
-    "dev": "concurrently -n API,CONSUMER -c green,blue \"npm run dev:api\" \"npm run dev:consumer\"",
+    "dev": "cross-env NODE_ENV=development nodemon --legacy-watch src/app.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

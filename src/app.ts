@@ -10,10 +10,25 @@ import { initKafka } from './services/queue.service';
 import { startWorker } from './jobs/notification.consumer';
 import { initLogProducer } from './services/logger.service';
 import { startLogConsumer } from './jobs/logs.consumer';
+import errorHandlerMiddleware from './middleware/errorhandler';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import * as YAML from 'yamljs';
+import * as swaggerUi from 'swagger-ui-express';
+
 
 config();
 
 const app = express();
+
+
+app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: 100
+    })
+)
 
 
 // const notFound = require('./middleware/not-found');
@@ -24,6 +39,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+app.use(cors());
+app.use(helmet());
 app.use(express.json());
 
 app.use('/api/preferences', prefrenceRoute);
@@ -32,10 +49,16 @@ app.use('/api/events', eventRoute);
 app.use('/api/logs', logRoute);
 
 app.get('/', (req, res) => {
-    res.status(200).json({ message: 'API is working!' });
+    res.send(
+    '<h1>Smart Notification and Deivery System API</h1><a href="/api-docs">Documentation</a>'
+  );
 });
 
-app.use(notFound)
+const swaggerDocument = YAML.load('./swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.use(notFound);
+app.use(errorHandlerMiddleware);
 
 
 const start = async () => {

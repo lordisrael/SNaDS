@@ -3,7 +3,8 @@ import AsyncHandler from "express-async-handler";
 
 import User from "../../models/user.model";
 import Preference from "../../models/prefrence.model";
-import mongoose from "mongoose";
+import {StatusCodes} from 'http-status-codes'
+
 
 export const createUser = AsyncHandler(async (req: Request, res: Response) => {
     let user: any;
@@ -26,16 +27,16 @@ export const createUser = AsyncHandler(async (req: Request, res: Response) => {
             timezone: "UTC",
         });
 
-        res.status(201).json({ user, preference });
+        res.status(StatusCodes.OK).json({ user, preference });
     } catch (error:any) {
-        if (error.code === 11000) {
-            const field = Object.keys(error.keyPattern)[0]; // e.g. "email" or "phone"
-            res.status(400).json({
-                success: false,
-                message: `${field} already exists`,
-            });
-            return;
-        }
+        // if (error.code === 11000) {
+        //     const field = Object.keys(error.keyPattern)[0]; // e.g. "email" or "phone"
+        //     res.status(StatusCodes.BAD_REQUEST).json({
+        //         success: false,
+        //         message: `${field} already exists`,
+        //     });
+        //     return;
+        // }
         // If user was created but preference failed → cleanup
         if (user?._id) {
             await User.deleteOne({ _id: user._id });
@@ -51,7 +52,7 @@ export const createUser = AsyncHandler(async (req: Request, res: Response) => {
 export const getUserById = AsyncHandler(async (req: Request, res: Response) => {
     const user = await User.findById(req.params.id);
     if (!user) {
-        res.status(404).json({ message: "User not found" });
+        res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
     } else {
         res.json(user);
     }

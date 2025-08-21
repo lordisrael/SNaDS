@@ -1,0 +1,460 @@
+openapi: 3.0.0
+info:
+  title: SNaDS API
+  version: 1.0.0
+  description: API documentation for Users, Preferences, Events and Logs
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Users
+  - name: Preferences
+  - name: Events
+  - name: Logs
+  - name: Auth
+
+paths:
+  /api/users:
+    get:
+      tags: [Users]
+      summary: Get all users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags: [Users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Users]
+      summary: Get user by id
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Users]
+      summary: Update user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags: [Users]
+      summary: Delete user
+      responses:
+        '204':
+          description: No content
+
+  /api/preferences:
+    get:
+      tags: [Preferences]
+      summary: Get all preferences
+      responses:
+        '200':
+          description: List of preferences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Preference'
+    post:
+      tags: [Preferences]
+      summary: Create preference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceCreate'
+      responses:
+        '201':
+          description: Preference created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preference'
+
+  /api/preferences/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Preferences]
+      summary: Get preference by id
+      responses:
+        '200':
+          description: Preference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preference'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Preferences]
+      summary: Update preference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferenceUpdate'
+      responses:
+        '200':
+          description: Updated preference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preference'
+    delete:
+      tags: [Preferences]
+      summary: Delete preference
+      responses:
+        '204':
+          description: No content
+
+  /api/events:
+    get:
+      tags: [Events]
+      summary: Get all events
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      tags: [Events]
+      summary: Create event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreate'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+
+  /api/events/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags: [Events]
+      summary: Get event by id
+      responses:
+        '200':
+          description: Event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Events]
+      summary: Update event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreate'
+      responses:
+        '200':
+          description: Updated event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+    delete:
+      tags: [Events]
+      summary: Delete event
+      responses:
+        '204':
+          description: No content
+
+  /api/logs:
+    get:
+      tags: [Logs]
+      summary: Get logs
+      responses:
+        '200':
+          description: List of logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Log'
+    post:
+      tags: [Logs]
+      summary: Create a log entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogCreate'
+      responses:
+        '201':
+          description: Log created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Log'
+
+  /api/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate and receive JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        msg:
+          type: string
+        stack:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    UserCreate:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    Preference:
+      type: object
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        notifications:
+          type: object
+          properties:
+            email_enabled:
+              type: boolean
+            sms_enabled:
+              type: boolean
+            push_enabled:
+              type: boolean
+        privacy:
+          type: object
+          properties:
+            profileVisibility:
+              type: string
+            dataSharing:
+              type: boolean
+        timezone:
+          type: string
+
+    PreferenceCreate:
+      type: object
+      required: [user_id]
+      properties:
+        user_id:
+          type: string
+        notifications:
+          $ref: '#/components/schemas/Preference/properties/notifications'
+        privacy:
+          $ref: '#/components/schemas/Preference/properties/privacy'
+        timezone:
+          type: string
+
+    PreferenceUpdate:
+      type: object
+      properties:
+        notifications:
+          $ref: '#/components/schemas/Preference/properties/notifications'
+        privacy:
+          $ref: '#/components/schemas/Preference/properties/privacy'
+        timezone:
+          type: string
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        user_id:
+          type: string
+        metadata:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+
+    EventCreate:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+        user_id:
+          type: string
+        metadata:
+          type: object
+
+    Log:
+      type: object
+      properties:
+        id:
+          type: string
+        level:
+          type: string
+        message:
+          type: string
+        meta:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+
+    LogCreate:
+      type: object
+      required: [level, message]
+      properties:
+        level:
+          type: string
+        message:
+          type: string
+        meta:
+          type: object
+
+    AuthRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+security:
+  - bearerAuth: []

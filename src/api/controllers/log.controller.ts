@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Log from "../../models/log.model";
 import Event from "../../models/event.model";
+import NotFoundError from "../../error/not-found";
+import {StatusCodes} from 'http-status-codes'
 
 /**
  * @desc    Get all logs
@@ -9,7 +11,7 @@ import Event from "../../models/event.model";
  */
 export const getLogs = asyncHandler(async (req: Request, res: Response) => {
   const logs = await Log.find().sort({ createdAt: -1 });
-  res.status(201).json(logs);
+  res.status(StatusCodes.OK).json(logs);
 });
 
 /**
@@ -21,12 +23,11 @@ export const getLogsByEvent = asyncHandler(async (req: Request, res: Response) =
 
   const eventExists = await Event.findById(eventId);
   if (!eventExists) {
-    res.status(404);
-    throw new Error("Event not found");
+    throw new NotFoundError("Event not found");
   }
 
   const logs = await Log.find({ eventId }).sort({ createdAt: -1 });
-  res.status(201).json(logs);
+  res.status(StatusCodes.OK).json(logs);
 });
 
 
@@ -38,9 +39,8 @@ export const getLogById = asyncHandler(async (req: Request, res: Response) => {
   const log = await Log.findById(req.params.id);
 
   if (!log) {
-    res.status(404);
-    throw new Error("Log not found");
+    throw new NotFoundError("Log not found");
   }
 
-  res.status(201).json(log);
+  res.status(StatusCodes.OK).json(log);
 });

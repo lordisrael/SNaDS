@@ -5,6 +5,10 @@ import asyncHandler from "express-async-handler";
 import Preference, { } from "../../models/prefrence.model";
 import User from "../../models/user.model";
 import { setUserPref } from "../../services/cache.service";
+import Errors from "../../error";
+import {StatusCodes} from 'http-status-codes'
+
+const { NotFoundError, ConflictError } = Errors;
 
 type NotificationMethod = 'email' | 'sms' | 'push';
 
@@ -37,6 +41,11 @@ const typeTemplates: Record<string, (user: any) => Record<string, any>> = {
     
 };
 
+/**
+ * @desc    Create a new event
+ * @route   POST /api/events
+ */
+
 export const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const { user_id, type, method } = req.body as {
         user_id: string;
@@ -44,11 +53,11 @@ export const createEvent = asyncHandler(async (req: Request, res: Response) => {
         method: NotificationMethod;
     };
     if (!user_id || !type || !method) {
-        res.status(400).json({ message: "Missing required fields" });
+        res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing required fields" });
         return;
     }
     if (!Object.keys(typeTemplates).includes(type)) {
-        res.status(400).json({ message: "Invalid event type" });
+        res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid event type" });
         return;
     }
 
@@ -58,7 +67,7 @@ export const createEvent = asyncHandler(async (req: Request, res: Response) => {
         // User preferences found
         await setUserPref(user_id, prefs);
         if (prefs.notifications[`${method}_enabled`] === false) {
-            res.status(200).json({ message: `User has opted out of ${method} notifications.` });
+            res.status(StatusCodes.FORBIDDEN).json({ message: `User has opted out of ${method} notifications.` });
             return;
         }
     }
@@ -66,7 +75,7 @@ export const createEvent = asyncHandler(async (req: Request, res: Response) => {
 
     const user = await User.findById(user_id);
     if (!user) {
-        res.status(404).json({ message: "User not found" });
+        res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         return;
     }
 
@@ -75,20 +84,30 @@ export const createEvent = asyncHandler(async (req: Request, res: Response) => {
     const event = new Event({ user_id, type, method, metadata, status: "queued" });
     await event.save();
     await produceEvent(event.toObject());
-    res.status(201).json({ eventId: event._id });
+    res.status(StatusCodes.CREATED).json({ eventId: event._id });
 });
+
+/**
+ * @desc    Get event by ID
+ * @route   GET /api/events/:id
+ */
 
 export const getEventById = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const event = await Event.findById(id);
     if (!event) {
-        res.status(404).json({ message: "Event not found" });
+        res.status(StatusCodes.NOT_FOUND).json({ message: "Event not found" });
         return;
     }
-    res.status(200).json(event);
+    res.status(StatusCodes.OK).json(event);
 });
+
+/**
+ * @desc    Get all events
+ * @route   GET /api/events
+ */
 
 export const getAllEvents = asyncHandler(async (req: Request, res: Response) => {
     const events = await Event.find();
-    res.status(200).json(events);
+    res.status(StatusCodes.OK).json(events);
 });

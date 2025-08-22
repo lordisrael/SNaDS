@@ -15,6 +15,8 @@ RUN if [ "$NODE_ENV" = "development" ]; then \
     fi
 # 5. Copy the rest of the application code
 COPY . .
+
+RUN npm run build
 # 6. Set environment variables
 ENV PORT=3000
 

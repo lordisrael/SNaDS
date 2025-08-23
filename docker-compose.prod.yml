@@ -14,6 +14,8 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV_PROD}
       - MONGO_URI=${MONGO_URI_PROD}
+      - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
     command: npm start
     depends_on: []
 

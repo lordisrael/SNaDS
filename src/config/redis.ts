@@ -1,16 +1,15 @@
+import Redis from "ioredis";
+import { Redis as UpstashRedis } from "@upstash/redis";
+
 let redis: any;
 
-if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-  // Upstash Redis (Production)
-  const { Redis } = require('@upstash/redis');
-  redis = new Redis({
+if (process.env.NODE_ENV === "production") {
+  redis = new UpstashRedis({
     url: process.env.UPSTASH_REDIS_REST_URL!,
     token: process.env.UPSTASH_REDIS_REST_TOKEN!,
   });
 } else {
-  // Local Redis (Development)
-  const Redis = require('ioredis');
-  redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+  redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 }
 
 export default redis;

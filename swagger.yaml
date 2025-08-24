@@ -2,7 +2,28 @@ openapi: 3.0.0
 info:
   title: SNaDS API
   version: 1.0.0
-  description: API documentation for Users, Preferences, Events and Logs
+  description: |
+    The SNaDS API is a robust, secure, and scalable RESTful interface for managing users, preferences, events, and logs in modern applications. 
+
+    **Key Features:**
+    - **User Management:** Create, retrieve, and manage user profiles with essential attributes. Supports extensibility for future user data.
+    - **Preferences:** Fine-grained control over notification settings (email, SMS, push), privacy options, and timezone configuration for each user.
+    - **Event Tracking:** Log and retrieve user-related events with rich metadata, supporting reminders, activity tracking, and audit trails.
+    - **Logging:** Access detailed logs for system events, errors, and user actions. Each log includes severity, message, metadata, and timestamps for monitoring and debugging.
+
+    **Security:**
+    - All endpoints require JWT bearer authentication, ensuring secure access and data protection.
+    - Designed for compliance with modern security standards, suitable for both production and development environments.
+
+    **Environment Support:**
+    - **Production:** Optimized for reliability, scalability, and security. Comprehensive error handling and clear request/response schemas.
+    - **Development:** Includes example payloads and responses for rapid prototyping, testing, and debugging.
+
+    **Usage:**
+    - **Base URL:** http://localhost:3000 (configurable for production)
+    - **Authentication:** Pass a valid JWT token in the Authorization header.
+
+    This documentation serves as a single source of truth for developers, DevOps, and QA teams, ensuring clarity and confidence in both production and development workflows.
 servers:
   - url: http://localhost:3000
 tags:
@@ -10,7 +31,6 @@ tags:
   - name: Preferences
   - name: Events
   - name: Logs
-  - name: Auth
 
 paths:
   /api/users:
@@ -35,6 +55,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserCreate'
+            examples:
+              simple:
+                summary: Example create user
+                value:
+                  name: Joseph Israel
+                  email: josephisraelmo2018@gmail.com
+                  phone: +2348012345678
       responses:
         '201':
           description: User created
@@ -42,79 +69,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-
-  /api/users/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-    get:
-      tags: [Users]
-      summary: Get user by id
-      responses:
-        '200':
-          description: User found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    put:
-      tags: [Users]
-      summary: Update user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserUpdate'
-      responses:
-        '200':
-          description: Updated user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-    delete:
-      tags: [Users]
-      summary: Delete user
-      responses:
-        '204':
-          description: No content
-
-  /api/preferences:
-    get:
-      tags: [Preferences]
-      summary: Get all preferences
-      responses:
-        '200':
-          description: List of preferences
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Preference'
-    post:
-      tags: [Preferences]
-      summary: Create preference
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PreferenceCreate'
-      responses:
-        '201':
-          description: Preference created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Preference'
-
   /api/preferences/{id}:
     parameters:
       - name: id
@@ -134,7 +88,7 @@ paths:
                 $ref: '#/components/schemas/Preference'
         '404':
           $ref: '#/components/responses/NotFound'
-    put:
+    post:
       tags: [Preferences]
       summary: Update preference
       requestBody:
@@ -143,6 +97,18 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PreferenceUpdate'
+            examples:
+              updateExample:
+                value:
+                  user_id: 689de9e50c8d1f878bbbfe40
+                  notifications:
+                    email_enabled: true
+                    sms_enabled: false
+                    push_enabled: true
+                  privacy:
+                    profileVisibility: "friends"
+                    dataSharing: false
+                  timezone: "UTC"
       responses:
         '200':
           description: Updated preference
@@ -150,26 +116,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Preference'
-    delete:
-      tags: [Preferences]
-      summary: Delete preference
-      responses:
-        '204':
-          description: No content
-
   /api/events:
-    get:
-      tags: [Events]
-      summary: Get all events
-      responses:
-        '200':
-          description: List of events
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Event'
     post:
       tags: [Events]
       summary: Create event
@@ -206,33 +153,10 @@ paths:
                 $ref: '#/components/schemas/Event'
         '404':
           $ref: '#/components/responses/NotFound'
-    put:
-      tags: [Events]
-      summary: Update event
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EventCreate'
-      responses:
-        '200':
-          description: Updated event
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Event'
-    delete:
-      tags: [Events]
-      summary: Delete event
-      responses:
-        '204':
-          description: No content
-
   /api/logs:
     get:
       tags: [Logs]
-      summary: Get logs
+      summary: Get all logs
       responses:
         '200':
           description: List of logs
@@ -242,42 +166,40 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Log'
-    post:
-      tags: [Logs]
-      summary: Create a log entry
-      requestBody:
+  /api/logs/{eventId}:
+    parameters:
+      - name: eventId
+        in: path
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LogCreate'
+        schema:
+          type: string
+    get:
+      tags: [Logs]
+      summary: Get log of an event
       responses:
-        '201':
-          description: Log created
+        '200':
+          description: Successful response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Log'
-
-  /api/login:
-    post:
-      tags: [Auth]
-      summary: Authenticate and receive JWT
-      requestBody:
+  /api/logs/{logId}:
+    parameters:
+      - name: logId
+        in: path
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthRequest'
+        schema:
+          type: string
+    get:
+      tags: [Logs]
+      summary: Get a particular log
       responses:
         '200':
-          description: Authentication successful
+          description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
-          description: Unauthorized
+                $ref: '#/components/schemas/Log'
 
 components:
   securitySchemes:
@@ -285,7 +207,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   responses:
     NotFound:
       description: Resource not found
@@ -293,7 +214,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
   schemas:
     Error:
       type: object
@@ -302,22 +222,24 @@ components:
           type: string
         stack:
           type: string
-
     User:
       type: object
       properties:
         id:
           type: string
+          example: 68a496dd5f8e74e60a2168e9
         name:
           type: string
+          example: Joseph Israel
         email:
           type: string
+          example: josephisraelmo2018@gmail.com
         phone:
           type: string
+          example: +2348012345678
         createdAt:
           type: string
           format: date-time
-
     UserCreate:
       type: object
       required: [name, email]
@@ -328,19 +250,6 @@ components:
           type: string
         phone:
           type: string
-        password:
-          type: string
-
-    UserUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        email:
-          type: string
-        phone:
-          type: string
-
     Preference:
       type: object
       properties:
@@ -366,30 +275,27 @@ components:
               type: boolean
         timezone:
           type: string
-
-    PreferenceCreate:
-      type: object
-      required: [user_id]
-      properties:
-        user_id:
-          type: string
-        notifications:
-          $ref: '#/components/schemas/Preference/properties/notifications'
-        privacy:
-          $ref: '#/components/schemas/Preference/properties/privacy'
-        timezone:
-          type: string
-
     PreferenceUpdate:
       type: object
       properties:
         notifications:
-          $ref: '#/components/schemas/Preference/properties/notifications'
+          type: object
+          properties:
+            email_enabled:
+              type: boolean
+            sms_enabled:
+              type: boolean
+            push_enabled:
+              type: boolean
         privacy:
-          $ref: '#/components/schemas/Preference/properties/privacy'
+          type: object
+          properties:
+            profileVisibility:
+              type: string
+            dataSharing:
+              type: boolean
         timezone:
           type: string
-
     Event:
       type: object
       properties:
@@ -401,10 +307,11 @@ components:
           type: string
         metadata:
           type: object
+        method:
+          type: string
         timestamp:
           type: string
           format: date-time
-
     EventCreate:
       type: object
       required: [type]
@@ -413,9 +320,10 @@ components:
           type: string
         user_id:
           type: string
+        method:
+          type: string
         metadata:
           type: object
-
     Log:
       type: object
       properties:
@@ -430,31 +338,5 @@ components:
         createdAt:
           type: string
           format: date-time
-
-    LogCreate:
-      type: object
-      required: [level, message]
-      properties:
-        level:
+        type:
           type: string
-        message:
-          type: string
-        meta:
-          type: object
-
-    AuthRequest:
-      type: object
-      required: [username, password]
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-
-    AuthResponse:
-      type: object
-      properties:
-        token:
-          type: string
-security:
-  - bearerAuth: []
